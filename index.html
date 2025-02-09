@@ -21,20 +21,36 @@
     </div>
 
     <script>
+        const binID = "67a913afacd3cb34a8dbbece";  // Tu Bin ID de JSONBin.io
+        const apiKey = "TU_CLAVE_DE_JSONBIN";  // Reemplázalo con tu API Key de JSONBin.io
+
         function registrarUbicacion(lat, lon) {
-            fetch("https://api.jsonbin.io/v3/b", {  // Servidor gratuito para almacenar datos
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "X-Master-Key": "67a913afacd3cb34a8dbbece"  // Reemplázalo con tu clave
-                },
-                body: JSON.stringify({
+            // Obtener los datos actuales del bin
+            fetch(`https://api.jsonbin.io/v3/b/${binID}/latest`, {
+                method: "GET",
+                headers: { "X-Master-Key": apiKey }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let visitas = data.record.visitas || [];
+                visitas.push({
                     latitud: lat,
                     longitud: lon,
                     userAgent: navigator.userAgent,
                     fecha: new Date().toISOString()
-                })
-            });
+                });
+
+                // Guardar los datos actualizados
+                fetch(`https://api.jsonbin.io/v3/b/${binID}`, {
+                    method: "PUT",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "X-Master-Key": apiKey 
+                    },
+                    body: JSON.stringify({ visitas })
+                });
+            })
+            .catch(error => console.error("Error al obtener datos:", error));
         }
 
         function solicitarUbicacion() {
